@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "batterysim-logger",
+  "private_key_id": "c740046d099a6d6dda78ae5232a9b2749030eb48",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC1Rnfcci7uBVax\n29N83zmEqM+fAJtYd1xX8wW8sMXNrxUfvxSAgjLyVAObWM1wscSdiXybynMALXhF\nHQxYsR6bBpNx9btezlYk+RvRBiAS2OYz4wiCrSfm05Mk/whXvdF4X5kRVHuKY6LQ\nFqhvqvwH2zjHAsxyJiT1BEOg2gW6b0RGFEU/ps32eTUCGKFQoUm3ZHYpQxEGT21W\ntjBz68LDPYsh4ZRKgbXO/tUlnDzLS+gnQ8/tlZRYsgMcbl5wYziIkWXTE94zaCLM\nwqz5wzZw8jO0LaSPdTM8j356Py75fYOYcy8+WymtDLpFNrMEw5dlZ8zwRp/E6pSh\ns+ifz5zJAgMBAAECggEAObiKigNBtkC07kVU/joGEpu+IJ8M2AqJuOeFOCQBmBDb\n5RPu70yF9GuUCm8oW23/cTpKF0FLhQ71cOxi9grP+AUMBgl89B83huZbWR9eLyIp\nivQLzbBdOD6+Z9VdTrL+dBncn4wLGnHHcgME9ym2vrmrRpM5jk9fDTWiYyGJGWez\nTgQ8gPbw/CcfFC1emEvIBwMjWOv8BGueZd+cVKE5Gn0K9B0CT/NYNOBzwN441kfu\ncs9KAyxUX05qYN0sX6+9RJZKUNAzxrgCz3s2xrFiyalgIwjJHegmNIdeNvnHKat8\nl35DmI7J39MzJGqISb4Adtl9cQ0GXka1BlS2kmCNEQKBgQDeqi/x6XEAVoDP8Vcj\nS/IehT9TEptTRShPpVbYS6IFsy1gZJS43tk0H/vWgfep0JZHlJgWO/uPmoSpMwtt\nKmCyixQKtN1LA/6HpplIdLVV8TcCX238dQnCEt2HAS0TMz6e2Cb8O9R8AUqKrDQY\nKkt9WtKVSJaS+6mRhDOmK/W0SwKBgQDQaf40KZAeKRJQOBrQuwAhfqft/l+lNuCE\nrFe2H8ehu+4kvRq5/eqmxzH/EI4HqZY2mK9lQza0qh9L4uoqSF0lBe9orCSPE5ed\ngruLp4x11OpTxf3gQXbTMnWgJeWGwSivntiAp1L6PNisPbgCY3IJ/CHZdTaPE5UU\nCCJT7sh+uwKBgQCdmhIzhQrhtViZVnZZ2mB2b9PhhdMA/ntI3Ht6vxXgOPGOP8Lw\nk3NjrJvBOd7FiIlGAwwe+LfW7gSmCiY1T4B//2bhKSFU/m/DLg1itpC/Uuuft1IP\nFfwhLN81toRkCapyHgaCFAsS9or/WmHJFO63vHg/B9DkGlLsV4mDPaw8vwKBgQCW\nlX7OQZmXsSVCQMdfOT4G9XRwSPLidJwUQFG/jYa4HQkcEmZVLFl210YQfO2iK64V\nFIzmJYJJVwH12qZGlrJ2JautfXOMzSMm82Z+qTibipMkpFGizqoEPtkuNTN6AeZb\nvfHAQyV5GK2VBaMGVsP24u2yKTaaehOkvZvP+R90MQKBgQCj3kWbXQ5pYJOWhIsO\nxByf4iSBAk2Lx9QKFDMlZ4xxj750wOLovPw5bF7J1eSFAQqV+YHZ+5h2umt6tk0T\n3ujZpq3idBrnzWZIBO/gsv7UlSj4zj0dwL9peXnvfcsS0v2mEptkos0NtofJ74Wz\nMrKCyd1dmMDB2r/oQE5eFKvzqQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "streamlit-email-logger@batterysim-logger.iam.gserviceaccount.com",
+  "client_id": "110301389565052704758",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/streamlit-email-logger%40batterysim-logger.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
