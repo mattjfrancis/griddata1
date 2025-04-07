@@ -2,4 +2,5 @@ streamlit
 matplotlib
 pandas
 numpy
-gspread oauth2client
+gspread 
+oauth2client
