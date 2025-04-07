@@ -359,16 +359,24 @@ if st.session_state.animating:
         # Use a Streamlit placeholder to overwrite each frame
         action_placeholder.markdown(status_html, unsafe_allow_html=True)
 
+        # Start explanation text from scratch each frame
+        explanation = f"### ⏱️ {current_row['timestamp'].strftime('%H:%M')}\n"
+        explanation += f"**Action:** `{current_row.get('action', 'idle').upper()}`\n\n"
+        explanation += f"• Price: £{current_row.get('price', 0):.1f} / MWh\n"
+        explanation += f"• Carbon: {current_row.get('carbon', 0):.1f} gCO₂/kWh\n"
+        explanation += f"• Demand: {current_row.get('user_demand_kWh', 0):.2f} kWh\n"
+        explanation += f"• SOC: {current_row.get('soc', 0):.2f}\n\n"
+        
         strategy = strategy_choice
         if strategy == "Tariff Avoidance Only":
-            explanation += f"🔍 Charging only when price < threshold (£{tariff_threshold})\n"
+            explanation += f"🔍 Charging if price < £{tariff_threshold} (tariff threshold)\n"
         elif strategy == "Price Arbitrage":
-            explanation += f"🔍 Charge if price < 80, Discharge if price > 150\n"
+            explanation += f"🔍 Charging if price < £80, discharging if price > £150\n"
         elif strategy == "Carbon Minimizer":
-            explanation += f"🔍 Charge if carbon < 200, Discharge if carbon > 400\n"
+            explanation += f"🔍 Charging if carbon < 200, discharging if > 400\n"
         else:
-            explanation += f"🔍 Blended score based on price + carbon\n"
-
+            explanation += f"🔍 Blended strategy using price & carbon intensity\n"
+        
         explanation_placeholder.markdown(explanation)
 
         st.session_state.frame_idx += 1
