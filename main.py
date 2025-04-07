@@ -312,6 +312,18 @@ if st.session_state.animating:
 
         # Highlighted Action Display
         current_action = current_row["action"]
+        # Real-time SOC emoji bar
+        soc_level = current_row["soc"]
+        total_blocks = 8
+        filled_blocks = int(round(soc_level * total_blocks))
+        empty_blocks = total_blocks - filled_blocks
+        emoji_bar = "🔋" * filled_blocks + "⚪️" * empty_blocks
+        
+        st.markdown(f"""
+        <div style="font-size: 1.5rem; margin-top: -1rem;">
+        <b>Battery Level:</b> {emoji_bar} ({soc_level:.0%})
+        </div>
+        """, unsafe_allow_html=True)
         action_display = {
             "charge": "🔵 **Charging** (storing cheap/clean energy)",
             "discharge": "🔴 **Discharging** (meeting demand or high price)",
