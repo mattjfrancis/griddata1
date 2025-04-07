@@ -57,6 +57,16 @@ strategy_choice = st.sidebar.selectbox("Choose Dispatch Strategy", [
     "Carbon Minimizer"
 ])
 
+st.sidebar.subheader("🎛️ Animation Settings")
+frame_delay = st.sidebar.slider("Frame Speed (seconds per frame)", 0.05, 1.0, 0.2, 0.05)
+
+if "animating" not in st.session_state:
+    st.session_state.animating = False
+if "paused" not in st.session_state:
+    st.session_state.paused = False
+if "frame_idx" not in st.session_state:
+    st.session_state.frame_idx = 0
+
 # Config
 battery_config = {
     "charge_efficiency": 0.95,
@@ -248,23 +258,86 @@ st.caption("✅ This summary helps identify the most cost-effective and carbon-e
 
 st.subheader("🎞️ Battery Dispatch Animation")
 
-if st.button("▶️ Play Animation"):
+start_col, pause_col, reset_col = st.columns(3)
+if start_col.button("▶️ Start"):
+    st.session_state.animating = True
+    st.session_state.paused = False
+
+if pause_col.button("⏸️ Pause/Resume"):
+    st.session_state.paused = not st.session_state.paused
+
+if reset_col.button("🔁 Reset"):
+    st.session_state.animating = False
+    st.session_state.paused = False
+    st.session_state.frame_idx = 0
+
+if st.session_state.animating:
     placeholder = st.empty()
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.set_title("Battery SOC Over Time")
-    ax.set_ylabel("SOC")
-    ax.set_ylim(0, 1)
-    soc_vals = []
+    explanation_placeholder = st.empty()
+    fig, axs = plt.subplots(5, 1, figsize=(10, 10), sharex=True)
     action_colors = {"charge": "blue", "discharge": "red", "idle": "gray"}
 
-    for i in range(len(df_schedule)):
-        ax.clear()
-        ax.set_title(f"Battery SOC - Time: {df_schedule['timestamp'][i].strftime('%H:%M')}")
-        ax.set_ylabel("SOC")
-        ax.set_ylim(0, 1)
-        ax.set_xlim(0, len(df_schedule))
-        ax.plot(range(i+1), df_schedule["soc"][:i+1], label="SOC", color="purple")
-        ax.scatter(i, df_schedule["soc"][i], color=action_colors[df_schedule["action"][i]], label=df_schedule["action"][i], zorder=5)
-        ax.legend()
+    while st.session_state.animating and st.session_state.frame_idx < len(df_schedule):
+        if st.session_state.paused:
+            time.sleep(0.1)
+            continue
+
+        i = st.session_state.frame_idx
+
+        # Clear all axes
+        for ax in axs:
+            ax.clear()
+
+        # Plot variables
+        axs[0].plot(df_schedule["timestamp"][:i+1], df_schedule["price"][:i+1], label="Price (£/MWh)")
+        axs[0].set_ylabel("Price")
+        axs[0].legend()
+
+        axs[1].plot(df_schedule["timestamp"][:i+1], df_schedule["carbon"][:i+1], label="Carbon (gCO₂/kWh)", color="green")
+        axs[1].set_ylabel("Carbon")
+        axs[1].legend()
+
+        axs[2].plot(df_schedule["timestamp"][:i+1], df_schedule["user_demand_kWh"][:i+1], label="Demand (kWh)", color="orange")
+        axs[2].set_ylabel("Demand")
+        axs[2].legend()
+
+        axs[3].plot(df_schedule["timestamp"][:i+1], df_schedule["soc"][:i+1], label="SOC", color="purple")
+        axs[3].set_ylabel("SOC")
+        axs[3].legend()
+
+        action_vals = df_schedule["action"][:i+1].map({"charge": 1, "discharge": -1, "idle": 0})
+        action_colors_list = df_schedule["action"][:i+1].map(action_colors)
+        axs[4].scatter(df_schedule["timestamp"][:i+1], action_vals, c=action_colors_list)
+        axs[4].set_ylabel("Action")
+        axs[4].set_yticks([-1, 0, 1])
+        axs[4].set_yticklabels(["Discharge", "Idle", "Charge"])
+        axs[4].set_xlabel("Time")
+
+        plt.tight_layout()
         placeholder.pyplot(fig)
-        time.sleep(0.1)  # Delay per frame
+
+        # EXPLANATION OF ACTION
+        current_row = df_schedule.iloc[i]
+        explanation = f"### ⏱️ {current_row['timestamp'].strftime('%H:%M')}\n"
+        explanation += f"**Action:** `{current_row['action'].upper()}`\n\n"
+        explanation += f"• Price: £{current_row['price']:.1f} / MWh\n"
+        explanation += f"• Carbon: {current_row['carbon']:.1f} gCO₂/kWh\n"
+        explanation += f"• Demand: {current_row['user_demand_kWh']:.2f} kWh\n"
+        explanation += f"• SOC: {current_row['soc']:.2f}\n\n"
+
+        strategy = strategy_choice
+        if strategy == "Tariff Avoidance Only":
+            explanation += f"🔍 Charging only when price < threshold (£{tariff_threshold})\n"
+        elif strategy == "Price Arbitrage":
+            explanation += f"🔍 Charge if price < 80, Discharge if price > 150\n"
+        elif strategy == "Carbon Minimizer":
+            explanation += f"🔍 Charge if carbon < 200, Discharge if carbon > 400\n"
+        else:
+            explanation += f"🔍 Blended score based on price + carbon\n"
+
+        explanation_placeholder.markdown(explanation)
+
+        st.session_state.frame_idx += 1
+        time.sleep(frame_delay)
+
+    st.session_state.animating = False  # Stop at the end
