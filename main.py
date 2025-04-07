@@ -283,6 +283,7 @@ if st.session_state.animating:
             continue
 
         i = st.session_state.frame_idx
+        current_row = df_schedule.iloc[i]
 
         # Clear all axes
         for ax in axs:
