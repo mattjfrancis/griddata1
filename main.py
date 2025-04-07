@@ -270,6 +270,8 @@ if reset_col.button("🔁 Reset"):
     st.session_state.animating = False
     st.session_state.paused = False
     st.session_state.frame_idx = 0
+    
+action_placeholder = st.empty()
 
 if st.session_state.animating:
     placeholder = st.empty()
@@ -309,8 +311,6 @@ if st.session_state.animating:
         # Render main chart
         plt.tight_layout()
         placeholder.pyplot(fig)
-
-        action_placeholder = st.empty()
         
         # === Unified Compact STATUS BOX (Action + Emoji SOC Bar) with Fallbacks ===
 
