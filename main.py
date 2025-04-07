@@ -1,4 +1,5 @@
 
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -155,4 +156,3 @@ with tab2:
         col1.metric("Total Energy", f"{df['Grid Energy (kWh)'].sum():.2f} kWh")
         col2.metric("Carbon Offset", f"{df['CO2 Offset (kg)'].sum():.2f} kg")
         col3.metric("Revenue", f"£{df['Reg Revenue (£)'].sum():.2f}")
- 
