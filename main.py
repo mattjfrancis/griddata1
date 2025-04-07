@@ -68,14 +68,16 @@ battery_config = {
 }
 
 def generate_daily_cycle(amplitude, base, noise, phase_shift=0):
-    hours = np.arange(24)
+    intervals = np.arange(96)
+    hours = intervals / 4
     cycle = base + amplitude * np.sin((hours - phase_shift) * np.pi / 12)
-    noise_component = np.random.normal(0, noise, size=24)
+    noise_component = np.random.normal(0, noise, size=96)
     return np.clip(cycle + noise_component, 0, None)
 
 def generate_user_demand():
     profile = []
-    for hour in range(24):
+    for interval in range(96):
+        hour = interval / 4
         if 6 <= hour < 12:
             demand = morning_demand
         elif 12 <= hour < 18:
@@ -84,13 +86,15 @@ def generate_user_demand():
             demand = evening_demand
         else:
             demand = night_demand
-        profile.append(demand / battery_capacity_kWh)
+        # Scale for 15-minute demand (kWh)
+        demand_kWh = demand * 0.25
+        profile.append(demand_kWh / battery_capacity_kWh)
     return profile
 
 if "last_region" not in st.session_state or st.session_state["last_region"] != region:
     st.session_state["prices"] = generate_daily_cycle(profile["price_amp"], profile["price_base"], profile["noise"], phase_shift=18)
     st.session_state["carbon"] = generate_daily_cycle(profile["carbon_amp"], profile["carbon_base"], profile["noise"], phase_shift=16)
-    st.session_state["timestamps"] = pd.date_range("2025-01-01", periods=24, freq="H")
+    st.session_state["timestamps"] = pd.date_range("2025-01-01", periods=96, freq="15min")
     st.session_state["last_region"] = region
 
 prices = st.session_state["prices"]
@@ -154,7 +158,7 @@ df_schedule = dispatch_strategy(prices, carbon, user_demand_profile, soc_start, 
 total_energy_used = df_schedule["grid_energy_kWh"].sum()
 total_cost = (df_schedule["price"] * df_schedule["grid_energy_kWh"] / 1000).sum()
 total_emissions = (df_schedule["carbon"] * df_schedule["grid_energy_kWh"] / 1000).sum()
-high_tariff_hours = df_schedule[df_schedule["price"] > tariff_threshold].shape[0]
+high_tariff_intervals = df_schedule[df_schedule["price"] > tariff_threshold].shape[0]
 
 st.subheader("📈 Strategy Summary")
 st.markdown(f"""
@@ -162,7 +166,7 @@ st.markdown(f"""
 - 🔌 **Total Energy Drawn from Grid:** `{total_energy_used:.2f} kWh`  
 - 💸 **Estimated Cost:** `£{total_cost:.2f}`  
 - 🟢 **Estimated Carbon Emissions:** `{total_emissions:.2f} kg CO₂`  
-- ⛔ **High Tariff Hours Avoided:** `{high_tariff_hours}/24`
+- ⛔ **High Tariff Hours Avoided:** `{high_tariff_intervals}/24`
 """)
 
 # ======== Visualization ========
