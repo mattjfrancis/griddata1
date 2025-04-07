@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -16,7 +17,6 @@ def get_carbon_data():
         carbon = base + 60 * np.cos(np.linspace(0, 2 * np.pi, 96)) + np.random.normal(0, 20, 96)
         return np.clip(carbon, 100, 500)
     except:
-        st.warning("Failed to fetch live carbon data. Using simulated fallback.")
         return 250 + 60 * np.cos(np.linspace(0, 2 * np.pi, 96))
 
 def get_price_data():
@@ -49,6 +49,8 @@ def simulate_strategy(name, price, carbon, reg_price, battery_kWh, power_kW, soc
                 action = "charge"
             elif score < 0.3 and soc > 0.2:
                 action = "discharge"
+        else:
+            action = "idle"
 
         if action == "charge":
             soc += power_kW / battery_kWh / 4
@@ -101,39 +103,24 @@ speed = st.sidebar.slider("Animation Speed", 0.01, 0.3, 0.05)
 
 # --- Simulations ---
 strategies = ["Price Arbitrage", "Carbon Minimizer", "Blended"]
-color_map = {"Price Arbitrage": "blue", "Carbon Minimizer": "green", "Blended": "orange"}
 results = {s: simulate_strategy(s, price, carbon, reg_price, battery_kWh, power_kW, soc_start, max_reg_share, participate) for s in strategies}
 
-# --- Strategy Summary ---
-st.header("Strategy Summary Table")
-summary = pd.DataFrame({
-    "Strategy": strategies,
-    "Total Energy (kWh)": [results[s]["Grid Energy (kWh)"].sum() for s in strategies],
-    "CO₂ Offset (kg)": [results[s]["CO2 Offset (kg)"].sum() for s in strategies],
-    "Revenue (£)": [results[s]["Reg Revenue (£)"].sum() for s in strategies]
-})
-st.dataframe(summary.style.format({
-    "Total Energy (kWh)": "{:.2f}",
-    "CO₂ Offset (kg)": "{:.2f}",
-    "Revenue (£)": "{:.2f}"
-}))
-
 # --- Tabs ---
-tab1, tab2 = st.tabs(["\U0001F4CA Strategy Comparison", "\U0001F4E1 Dashboard"])
+tab1, tab2 = st.tabs(["📊 Strategy Comparison", "📡 Dashboard"])
 
 with tab1:
     st.header("Strategy Comparison")
     fig, ax = plt.subplots(figsize=(10, 5))
     for s in strategies:
-        ax.plot(results[s]["Time"], results[s]["SOC"], label=s, color=color_map[s])
+        ax.plot(results[s]["Time"], results[s]["SOC"], label=s)
     ax.set_ylabel("State of Charge")
     ax.legend()
     st.pyplot(fig)
 
     fig2, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
     for s in strategies:
-        ax1.plot(results[s]["Time"], results[s]["Reg Revenue (£)"].cumsum(), label=s, color=color_map[s])
-        ax2.plot(results[s]["Time"], results[s]["CO2 Offset (kg)"].cumsum(), label=s, color=color_map[s])
+        ax1.plot(results[s]["Time"], results[s]["Reg Revenue (£)"].cumsum(), label=s)
+        ax2.plot(results[s]["Time"], results[s]["CO2 Offset (kg)"].cumsum(), label=s)
     ax1.set_ylabel("Revenue (£)")
     ax2.set_ylabel("CO₂ Offset (kg)")
     ax2.set_xlabel("Time")
@@ -141,35 +128,29 @@ with tab1:
     ax2.legend()
     st.pyplot(fig2)
 
+
 # --- Animated Visualization ---
 st.header("Animated SOC View (24h - 15min steps)")
 plot = st.empty()
 progress = st.progress(0)
-battery_display = st.empty()
 
-if st.button("Run Animation"):
-    for t in range(steps):
-        fig, ax = plt.subplots(figsize=(10, 5))
-        for s in strategies:
-            ax.plot(results[s]["Time"][:t+1], results[s]["SOC"][:t+1], label=s, color=color_map[s])
-        ax.axvline(results[strategies[0]]["Time"][t], color="black", linestyle="--", linewidth=1)
-        ax.set_ylabel("SOC")
-        ax.legend()
-        plot.pyplot(fig)
-        progress.progress(t / (steps - 1))
-
-        # Battery visual
-        soc_val = results["Blended"]["SOC"][t]
-        fill_blocks = int(soc_val * 10)
-        battery_display.markdown(f"**Battery SOC:** [{'|' * fill_blocks}{' ' * (10 - fill_blocks)}] {soc_val*100:.1f}%")
-
-        time.sleep(speed)
+for t in range(steps):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for s in strategies:
+        ax.plot(results[s]["Time"][:t+1], results[s]["SOC"][:t+1], label=s)
+    ax.axvline(results[strategies[0]]["Time"][t], color="black", linestyle="--", linewidth=1)
+    ax.set_ylabel("SOC")
+    ax.legend()
+    plot.pyplot(fig)
+    progress.progress(t / (steps - 1))
+    time.sleep(speed)
 
 with tab2:
+
     st.header("Live Dashboard (Simulated)")
     for s in strategies:
         df = results[s]
-        st.subheader(f"\U0001F50D {s}")
+        st.subheader(f"🔍 {s}")
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Energy", f"{df['Grid Energy (kWh)'].sum():.2f} kWh")
         col2.metric("Carbon Offset", f"{df['CO2 Offset (kg)'].sum():.2f} kg")
