@@ -310,8 +310,14 @@ if st.session_state.animating:
         plt.tight_layout()
         placeholder.pyplot(fig)
 
-        # Highlighted Action Display
-        # === Unified Compact STATUS BOX (Action + Emoji SOC Bar) ===
+        action_placeholder = st.empty()
+        
+        # === Unified Compact STATUS BOX (Action + Emoji SOC Bar) with Fallbacks ===
+
+        # Safe extraction of current action
+        current_action = current_row.get("action", "idle")  # default to idle if missing
+        
+        # Define action text and color mapping
         action_display = {
             "charge": "🔵 <b>Charging</b><br><small>Storing cheap/clean energy</small>",
             "discharge": "🔴 <b>Discharging</b><br><small>Meeting demand / high price</small>",
@@ -323,28 +329,34 @@ if st.session_state.animating:
             "idle": "gray"
         }
         
-        # Emoji bar
-        soc_level = current_row["soc"]
+        # Fallback in case action key is invalid
+        action_text = action_display.get(current_action, action_display["idle"])
+        color = action_color.get(current_action, "gray")
+        
+        # Emoji-based SOC bar
+        soc_level = current_row.get("soc", 0.0)
         total_blocks = 8
         filled_blocks = int(round(soc_level * total_blocks))
         empty_blocks = total_blocks - filled_blocks
         emoji_bar = "🔋" * filled_blocks + "⚪️" * empty_blocks
         
-        # Combined display
+        # Render the full box
         status_html = f"""
         <div style="
-            border-left: 6px solid {action_color[current_action]};
+            border-left: 6px solid {color};
             padding: 0.8rem;
             border-radius: 6px;
             background-color: #f7f7f7;
             font-size: 0.95rem;
             margin-top: 0.5rem;
         ">
-        <span style="color: {action_color[current_action]}; font-weight: bold;">🧠 Action:</span>
-        {action_display[current_action]}
+        <span style="color: {color}; font-weight: bold;">🧠 Action:</span>
+        {action_text}
         <div style="margin-top: 0.5rem;"><b>Battery:</b> {emoji_bar} ({soc_level:.0%})</div>
         </div>
         """
+        
+        # Use a Streamlit placeholder to overwrite each frame
         action_placeholder.markdown(status_html, unsafe_allow_html=True)
 
         strategy = strategy_choice
