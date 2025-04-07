@@ -305,13 +305,27 @@ if st.session_state.animating:
         axs[3].set_ylabel("SOC")
         axs[3].legend()
 
-        action_vals = df_schedule["action"][:i+1].map({"charge": 1, "discharge": -1, "idle": 0})
-        action_colors_list = df_schedule["action"][:i+1].map(action_colors)
-        axs[4].scatter(df_schedule["timestamp"][:i+1], action_vals, c=action_colors_list)
-        axs[4].set_ylabel("Action")
-        axs[4].set_yticks([-1, 0, 1])
-        axs[4].set_yticklabels(["Discharge", "Idle", "Charge"])
-        axs[4].set_xlabel("Time")
+        # Render main chart
+        plt.tight_layout()
+        placeholder.pyplot(fig)
+
+        # Highlighted Action Display
+        current_action = current_row["action"]
+        action_display = {
+            "charge": "🔵 **Charging** (storing cheap/clean energy)",
+            "discharge": "🔴 **Discharging** (meeting demand or high price)",
+            "idle": "⚪ **Idle** (holding energy, no advantage)"
+        }
+        action_color = {
+            "charge": "blue",
+            "discharge": "red",
+            "idle": "gray"
+        }
+        st.markdown(f"""
+        <div style="border: 2px solid {action_color[current_action]}; padding: 1rem; border-radius: 10px; background-color: #f9f9f9">
+        <h3 style="color: {action_color[current_action]}; margin-bottom: 0;">🧠 Current Action: {action_display[current_action]}</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
         plt.tight_layout()
         placeholder.pyplot(fig)
