@@ -112,7 +112,11 @@ summary = pd.DataFrame({
     "CO₂ Offset (kg)": [results[s]["CO2 Offset (kg)"].sum() for s in strategies],
     "Revenue (£)": [results[s]["Reg Revenue (£)"].sum() for s in strategies]
 })
-st.dataframe(summary.style.format("{:.2f}"))
+st.dataframe(summary.style.format({
+    "Total Energy (kWh)": "{:.2f}",
+    "CO₂ Offset (kg)": "{:.2f}",
+    "Revenue (£)": "{:.2f}"
+}))
 
 # --- Tabs ---
 tab1, tab2 = st.tabs(["\U0001F4CA Strategy Comparison", "\U0001F4E1 Dashboard"])
