@@ -1,5 +1,4 @@
-
-
+import time
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -246,3 +245,26 @@ st.dataframe(df_all_strategies.style.format({
 }).highlight_min(subset=["Cost (£)", "CO₂ (kg)"], color="lightgreen"))
 
 st.caption("✅ This summary helps identify the most cost-effective and carbon-efficient strategy based on your grid conditions and load profile.")
+
+st.subheader("🎞️ Battery Dispatch Animation")
+
+if st.button("▶️ Play Animation"):
+    placeholder = st.empty()
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.set_title("Battery SOC Over Time")
+    ax.set_ylabel("SOC")
+    ax.set_ylim(0, 1)
+    soc_vals = []
+    action_colors = {"charge": "blue", "discharge": "red", "idle": "gray"}
+
+    for i in range(len(df_schedule)):
+        ax.clear()
+        ax.set_title(f"Battery SOC - Time: {df_schedule['timestamp'][i].strftime('%H:%M')}")
+        ax.set_ylabel("SOC")
+        ax.set_ylim(0, 1)
+        ax.set_xlim(0, len(df_schedule))
+        ax.plot(range(i+1), df_schedule["soc"][:i+1], label="SOC", color="purple")
+        ax.scatter(i, df_schedule["soc"][i], color=action_colors[df_schedule["action"][i]], label=df_schedule["action"][i], zorder=5)
+        ax.legend()
+        placeholder.pyplot(fig)
+        time.sleep(0.1)  # Delay per frame
