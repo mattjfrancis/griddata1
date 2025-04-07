@@ -311,46 +311,41 @@ if st.session_state.animating:
         placeholder.pyplot(fig)
 
         # Highlighted Action Display
-        current_action = current_row["action"]
-        # Real-time SOC emoji bar
-        soc_level = current_row["soc"]
-        total_blocks = 8
-        filled_blocks = int(round(soc_level * total_blocks))
-        empty_blocks = total_blocks - filled_blocks
-        emoji_bar = "🔋" * filled_blocks + "⚪️" * empty_blocks
-        
-        st.markdown(f"""
-        <div style="font-size: 1.5rem; margin-top: -1rem;">
-        <b>Battery Level:</b> {emoji_bar} ({soc_level:.0%})
-        </div>
-        """, unsafe_allow_html=True)
+        # === Unified Compact STATUS BOX (Action + Emoji SOC Bar) ===
         action_display = {
-            "charge": "🔵 **Charging** (storing cheap/clean energy)",
-            "discharge": "🔴 **Discharging** (meeting demand or high price)",
-            "idle": "⚪ **Idle** (holding energy, no advantage)"
+            "charge": "🔵 <b>Charging</b><br><small>Storing cheap/clean energy</small>",
+            "discharge": "🔴 <b>Discharging</b><br><small>Meeting demand / high price</small>",
+            "idle": "⚪ <b>Idle</b><br><small>No action needed</small>"
         }
         action_color = {
             "charge": "blue",
             "discharge": "red",
             "idle": "gray"
         }
-        st.markdown(f"""
-        <div style="border: 2px solid {action_color[current_action]}; padding: 1rem; border-radius: 10px; background-color: #f9f9f9">
-        <h3 style="color: {action_color[current_action]}; margin-bottom: 0;">🧠 Current Action: {action_display[current_action]}</h3>
+        
+        # Emoji bar
+        soc_level = current_row["soc"]
+        total_blocks = 8
+        filled_blocks = int(round(soc_level * total_blocks))
+        empty_blocks = total_blocks - filled_blocks
+        emoji_bar = "🔋" * filled_blocks + "⚪️" * empty_blocks
+        
+        # Combined display
+        status_html = f"""
+        <div style="
+            border-left: 6px solid {action_color[current_action]};
+            padding: 0.8rem;
+            border-radius: 6px;
+            background-color: #f7f7f7;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        ">
+        <span style="color: {action_color[current_action]}; font-weight: bold;">🧠 Action:</span>
+        {action_display[current_action]}
+        <div style="margin-top: 0.5rem;"><b>Battery:</b> {emoji_bar} ({soc_level:.0%})</div>
         </div>
-        """, unsafe_allow_html=True)
-
-        plt.tight_layout()
-        placeholder.pyplot(fig)
-
-        # EXPLANATION OF ACTION
-        current_row = df_schedule.iloc[i]
-        explanation = f"### ⏱️ {current_row['timestamp'].strftime('%H:%M')}\n"
-        explanation += f"**Action:** `{current_row['action'].upper()}`\n\n"
-        explanation += f"• Price: £{current_row['price']:.1f} / MWh\n"
-        explanation += f"• Carbon: {current_row['carbon']:.1f} gCO₂/kWh\n"
-        explanation += f"• Demand: {current_row['user_demand_kWh']:.2f} kWh\n"
-        explanation += f"• SOC: {current_row['soc']:.2f}\n\n"
+        """
+        action_placeholder.markdown(status_html, unsafe_allow_html=True)
 
         strategy = strategy_choice
         if strategy == "Tariff Avoidance Only":
