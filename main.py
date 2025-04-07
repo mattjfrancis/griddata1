@@ -1,5 +1,42 @@
-import time
 import streamlit as st
+import re
+
+# Page config
+st.set_page_config(page_title="🔋 Energy Grid Simulator", layout="wide")
+
+# Email validation function
+def is_valid_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+# Email gating logic
+if "email_entered" not in st.session_state:
+    st.session_state.email_entered = False
+
+if not st.session_state.email_entered:
+    st.title("🚀 Welcome to the Grid Battery Simulator")
+
+    st.markdown("""
+    Optimize your energy strategy based on real-time:
+    - 💰 Price
+    - 🌿 Carbon intensity
+    - ⚡ User demand
+
+    Watch your virtual battery **charge/discharge live** as it responds to changing conditions.
+
+    👉 Enter your email to get access:
+    """)
+
+    email = st.text_input("📧 Email Address", placeholder="you@example.com")
+
+    if st.button("Let me in"):
+        if is_valid_email(email):
+            st.session_state.email_entered = True
+            st.success("✅ You're in! Launching the simulator...")
+        else:
+            st.error("Please enter a valid email address.")
+    st.stop()
+    
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
